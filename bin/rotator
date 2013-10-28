@@ -51,9 +51,9 @@ signaled.add_argument('--signal', dest='signal', default='HUP',
 rotated = subparsers.add_parser('rotated')
 add_arguments(rotated)
 rotated.set_defaults(func=rotate)
-rotated.add_argument('--size', dest='size', default=None, type=str,
+rotated.add_argument('--size', dest='size', default='100 MB', type=str,
     help='What size to rotate at (in bytes or with KB, MB or GB)')
-rotated.add_argument('--count', dest='count', default=None, type=int,
+rotated.add_argument('--count', dest='count', default=5, type=int,
     help='How many backups to keep around')
 
 args = parser.parse_args()
