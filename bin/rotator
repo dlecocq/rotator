@@ -1,0 +1,60 @@
+#! /usr/bin/env python
+
+from rotator import Watched, Signaled, Rotated
+
+
+def watch(args):
+    '''Run the watched handler'''
+    mode = 'w+' if args.truncate else 'a'
+    Watched(args.path, mode).run(args.buffered)
+
+
+def signal(args):
+    '''Run the signaled handler'''
+    mode = 'w+' if args.truncate else 'a'
+    Signaled(args.path, mode, args.signal).run(args.buffered)
+
+
+def rotate(args):
+    '''Run the rotated handler'''
+    mode = 'w+' if args.truncate else 'a'
+    Rotated(args.path, mode, args.size, args.count).run(args.buffered)
+
+
+def add_arguments(parser):
+    parser.add_argument('path', help='The path to write out to')
+    parser.add_argument('--buffered', dest='buffered', default=False,
+        action='store_true', help='Use buffered reads from stdin')
+    parser.add_argument('--truncate', dest='truncate', default=False,
+        action='store_true', help='Truncate the log file')
+
+
+# Now run the parser
+import argparse
+
+parser = argparse.ArgumentParser(description='Write to a file, rotate logs')
+subparsers = parser.add_subparsers(title='subcommands')
+
+# Our watched subparser
+watched = subparsers.add_parser('watched')
+add_arguments(watched)
+watched.set_defaults(func=watch)
+
+# Our signal subparser
+signaled = subparsers.add_parser('signaled')
+add_arguments(signaled)
+signaled.set_defaults(func=signal)
+signaled.add_argument('--signal', dest='signal', default='HUP',
+    help='What signal to trap for rotate the file')
+
+# Rotated subparser
+rotated = subparsers.add_parser('rotated')
+add_arguments(rotated)
+rotated.set_defaults(func=rotate)
+rotated.add_argument('--size', dest='size', default=None, type=str,
+    help='What size to rotate at (in bytes or with KB, MB or GB)')
+rotated.add_argument('--count', dest='count', default=None, type=int,
+    help='How many backups to keep around')
+
+args = parser.parse_args()
+args.func(args)
